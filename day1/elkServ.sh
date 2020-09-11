@@ -20,28 +20,12 @@ EOT
 yum install logstash -y
 /usr/share/logstash/bin/system-install
 
-cat > /etc/logstash/conf.d/ls.conf << EOF
-input {
-  file {
-    path => “/path/to/log"
-    start_position => "beginning"
-  }
-}
-
-output {
-  elasticsearch {
-    hosts => ["localhost:9200"]
-  }
-  stdout { codec => rubydebug }
-}
-EOF
-
 systemctl start logstash
 
 #----------------------------------------------------------------------
 
 wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.9.1-x86_64.rpm
-sudo rpm --install elasticsearch-7.9.1-x86_64.rpm
+rpm --install elasticsearch-7.9.1-x86_64.rpm
 
 systemctl start elasticsearch.service
 
@@ -61,4 +45,8 @@ EOT
 
 yum install kibana -y
 echo -e '\nserver.port: 5601\nserver.host: "0.0.0.0"' >> /etc/kibana/kibana.yml
+
 systemctl start kibana
+
+echo -e '\nnetwork.host: 0.0.0.0\ndiscovery.seed_hosts: ["127.0.0.1", "0.0.0.0"]' >> /etc/elasticsearch/elasticsearch.yml
+systemctl restart elasticsearch.service
